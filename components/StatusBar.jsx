@@ -31,7 +31,7 @@ export default function StatusBar({ status, progress, stats, jobs, onStop }) {
             <span className={progress.waitMs ? 'text-amber-600' : 'text-accent-700'}>
               {progress.waitMs ? (
                 <>
-                  cooling down <span className="text-ink-900">{Math.ceil(progress.waitMs / 1000)}s</span>
+                  cooling down <span className="text-ink-900">{Math.min(20, Math.ceil(progress.waitMs / 1000))}s</span>
                   <span className="text-ink-300"> · {progress.enriched || 0}/{progress.enrichTotal}</span>
                 </>
               ) : (
