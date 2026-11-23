@@ -8,6 +8,7 @@ import { SkeletonList } from '@/components/Skeleton';
 import { Toolbar, FilterBar } from '@/components/ResultsToolbar';
 import { useJobStream } from '@/lib/useJobStream';
 import { downloadCSV, downloadJSON } from '@/lib/export';
+import { freshnessMs, isFreshWithin } from '@/lib/freshness';
 
 const DEFAULT_FORM = {
   keywords: '',
@@ -26,12 +27,6 @@ const SORTS = [
   { id: 'company', label: 'Company' },
 ];
 
-function useFreshFilter(job) {
-  if (!job.postedAt) return false;
-  const d = new Date(`${job.postedAt}T00:00:00Z`).getTime();
-  return Date.now() - d < 3 * 86400000;
-}
-
 export default function Page() {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [query, setQuery] = useState('');
@@ -48,14 +43,17 @@ export default function Page() {
     let out = jobs.filter((j) => {
       if (q && !`${j.title} ${j.company}`.toLowerCase().includes(q)) return false;
       if (seniority && j.seniority !== seniority) return false;
-      if (onlyFresh && !useFreshFilter(j)) return false;
+      if (onlyFresh && !isFreshWithin(j, 3)) return false;
       if (onlyRemote && !/remote/i.test(`${j.location} ${j.workplaceType || ''}`)) return false;
       return true;
     });
     if (sort === 'newest') {
-      out = out.slice().sort((a, b) => String(b.postedAt || '').localeCompare(String(a.postedAt || '')));
+      // Sort on the real timestamp, not the string: cards carry both the ISO date and a
+      // human label ("5 hours ago"), and only the label reveals sub-day freshness. Cards with
+      // no date at all go last rather than first.
+      out = out.slice().sort((a, b) => freshnessMs(b) - freshnessMs(a));
     } else if (sort === 'company') {
-      out = out.slice().sort((a, b) => String(a.company || '').localeCompare(String(b.company || '')));
+      out = out.slice().sort((a, b) => String(a.company || '').localeCompare(String(b.company || ''), 'en', { sensitivity: 'base' }));
     }
     return out;
   }, [jobs, query, seniority, onlyFresh, onlyRemote, sort]);

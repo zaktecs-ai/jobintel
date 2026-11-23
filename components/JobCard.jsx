@@ -1,19 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
-function timeAgo(dateStr, label) {
-  if (label) return label.replace(/\s+/g, ' ').trim();
-  if (!dateStr) return '—';
-  const d = new Date(`${dateStr}T00:00:00Z`);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  const days = Math.round((Date.now() - d.getTime()) / 86400000);
-  if (days <= 0) return 'Today';
-  if (days === 1) return '1 day ago';
-  if (days < 30) return `${days} days ago`;
-  const months = Math.round(days / 30);
-  return months <= 1 ? '1 month ago' : `${months} months ago`;
-}
+import { formatAge } from '@/lib/freshness';
 
 function highlight(snippet, term) {
   if (!term || term.length < 2) return snippet;
@@ -98,7 +86,7 @@ export default function JobCard({ job, index, keyword }) {
                 <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
                 <path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              {timeAgo(job.postedAt, job.postedLabel)}
+              {formatAge(job)}
             </span>
             {job.earlyApplicant ? (
               <span className="rounded-full bg-moss-100 px-2 py-0.5 text-2xs font-medium text-moss-500">

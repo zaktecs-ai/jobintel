@@ -11,7 +11,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:engine": "node lib/test-engine.mjs"
+    "test:engine": "node lib/test-engine.mjs",
+    "test": "node lib/verify.mjs && node lib/verify-freshness.mjs",
+    "test:live": "node lib/verify-live.mjs"
   },
   "keywords": [],
   "type": "module",
