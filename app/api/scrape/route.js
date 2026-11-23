@@ -130,8 +130,11 @@ export async function GET(request) {
           signal: ac.signal,
           onEvent: (e) => send(e),
           onBatch: async (cards, meta) => {
-            collected.push(...cards);
-            send({ type: 'jobs', jobs: cards, meta });
+            // When we asked LinkedIn for f_WT=2 every card is remote by definition; carry that
+            // signal so the client filter does not throw away cards whose text lacks the word.
+            const tagged = remote === 'remote' ? cards.map((c) => ({ ...c, matchedRemoteFilter: true })) : cards;
+            collected.push(...tagged);
+            send({ type: 'jobs', jobs: tagged, meta });
           },
         });
 

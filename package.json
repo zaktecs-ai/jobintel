@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:engine": "node lib/test-engine.mjs",
-    "test": "node lib/verify.mjs && node lib/verify-freshness.mjs",
+    "test": "node lib/verify.mjs && node lib/verify-freshness.mjs && node lib/verify-workplace.mjs",
     "test:live": "node lib/verify-live.mjs"
   },
   "keywords": [],

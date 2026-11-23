@@ -9,6 +9,7 @@ import { Toolbar, FilterBar } from '@/components/ResultsToolbar';
 import { useJobStream } from '@/lib/useJobStream';
 import { downloadCSV, downloadJSON } from '@/lib/export';
 import { freshnessMs, isFreshWithin } from '@/lib/freshness';
+import { matchesWorkplace } from '@/lib/workplace';
 
 const DEFAULT_FORM = {
   keywords: '',
@@ -44,7 +45,7 @@ export default function Page() {
       if (q && !`${j.title} ${j.company}`.toLowerCase().includes(q)) return false;
       if (seniority && j.seniority !== seniority) return false;
       if (onlyFresh && !isFreshWithin(j, 3)) return false;
-      if (onlyRemote && !/remote/i.test(`${j.location} ${j.workplaceType || ''}`)) return false;
+      if (onlyRemote && !matchesWorkplace(j, 'remote')) return false;
       return true;
     });
     if (sort === 'newest') {
