@@ -167,8 +167,11 @@ export default function Page() {
                     type="button"
                     key={s.id}
                     onClick={() => setSort(s.id)}
-                    className={`text-2xs font-medium transition ${
-                      sort === s.id ? 'text-ink-900 underline decoration-ink-300 underline-offset-4' : 'text-ink-400 hover:text-ink-700'
+                    aria-pressed={sort === s.id}
+                    className={`inline-flex h-7 items-center rounded-md px-2 text-2xs font-medium transition ${
+                      sort === s.id
+                        ? 'bg-ink-900 text-white'
+                        : 'text-ink-400 hover:bg-surface-100 hover:text-ink-700'
                     }`}
                   >
                     {s.label}

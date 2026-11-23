@@ -45,7 +45,7 @@ export default function StatusBar({ status, progress, stats, jobs, onStop }) {
 
         <div className="ml-auto flex items-center gap-2">
           {busy ? (
-            <button type="button" onClick={onStop} className="btn-ghost !px-2.5 !py-1 text-2xs">
+            <button type="button" onClick={onStop} className="btn-ghost !min-h-[34px] !px-3 text-2xs">
               Stop
             </button>
           ) : null}

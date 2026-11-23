@@ -92,8 +92,11 @@ body {
   }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-surface-300 bg-white px-2.5 py-1
-      text-xs text-ink-500 transition hover:border-ink-300 hover:text-ink-700;
+    /* min-h-8 keeps the pill compact on desktop but the tap target honest; the extra padding
+       is what makes the whole pill clickable rather than just the text. */
+    @apply inline-flex min-h-[34px] items-center gap-1.5 rounded-full border border-surface-300
+      bg-white px-3 py-1.5 text-xs text-ink-500 transition
+      hover:border-ink-300 hover:text-ink-700;
   }
 
   .chip-on {

@@ -22,7 +22,7 @@ export function Toolbar({ jobs, total, keyword, onExport }) {
         type="button"
         onClick={() => onExport('csv')}
         disabled={!jobs.length}
-        className="btn-ghost !px-2.5 !py-1 text-2xs disabled:opacity-40"
+        className="btn-ghost !min-h-[34px] !px-3 text-2xs disabled:opacity-40"
       >
         CSV
       </button>
@@ -30,7 +30,7 @@ export function Toolbar({ jobs, total, keyword, onExport }) {
         type="button"
         onClick={() => onExport('json')}
         disabled={!jobs.length}
-        className="btn-ghost !px-2.5 !py-1 text-2xs disabled:opacity-40"
+        className="btn-ghost !min-h-[34px] !px-3 text-2xs disabled:opacity-40"
       >
         JSON
       </button>
@@ -75,7 +75,7 @@ export function FilterBar({ jobs, filtered, query, setQuery, seniority, setSenio
           <button
             type="button"
             onClick={() => setSeniority('')}
-            className={`chip !py-0.5 !text-2xs ${seniority === '' ? 'chip-on' : ''}`}
+            className={`chip !text-2xs ${seniority === '' ? 'chip-on' : ''}`}
           >
             All levels
           </button>
@@ -84,7 +84,7 @@ export function FilterBar({ jobs, filtered, query, setQuery, seniority, setSenio
               type="button"
               key={l}
               onClick={() => setSeniority(seniority === l ? '' : l)}
-              className={`chip !py-0.5 !text-2xs ${seniority === l ? 'chip-on' : ''}`}
+              className={`chip !text-2xs ${seniority === l ? 'chip-on' : ''}`}
             >
               {l}
             </button>
@@ -97,7 +97,7 @@ export function FilterBar({ jobs, filtered, query, setQuery, seniority, setSenio
           type="button"
           onClick={() => setOnlyFresh(!onlyFresh)}
           aria-pressed={onlyFresh}
-          className={`chip !py-0.5 !text-2xs ${onlyFresh ? 'chip-on' : ''}`}
+          className={`chip !text-2xs ${onlyFresh ? 'chip-on' : ''}`}
         >
           Posted last 3 days
         </button>
@@ -105,7 +105,7 @@ export function FilterBar({ jobs, filtered, query, setQuery, seniority, setSenio
           type="button"
           onClick={() => setOnlyRemote(!onlyRemote)}
           aria-pressed={onlyRemote}
-          className={`chip !py-0.5 !text-2xs ${onlyRemote ? 'chip-on' : ''}`}
+          className={`chip !text-2xs ${onlyRemote ? 'chip-on' : ''}`}
         >
           Remote only
         </button>
