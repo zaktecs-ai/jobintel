@@ -27,7 +27,7 @@ const DATES = [
 
 const COUNTS = [25, 50, 100, 200];
 
-const POPULAR = ['Lahore, Pakistan', 'Karachi, Pakistan', 'Islamabad, Pakistan', 'Dubai, United Arab Emirates', 'Remote', 'London, United Kingdom', 'United States'];
+const POPULAR = ['Lahore, Pakistan', 'Karachi, Pakistan', 'Islamabad, Pakistan', 'Dubai, United Arab Emirates', 'London, United Kingdom', 'United States'];
 
 function Section({ step, title, hint, children }) {
   return (
@@ -106,7 +106,7 @@ export default function SearchPanel({ form, setForm, onRun, onStop, status, runn
             autoComplete="off"
           />
           <div className="flex flex-wrap gap-1.5 pt-0.5">
-            {POPULAR.slice(0, 5).map((p) => (
+            {POPULAR.map((p) => (
               <button
                 type="button"
                 key={p}
