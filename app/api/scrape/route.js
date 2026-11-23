@@ -19,6 +19,7 @@
  */
 
 import { runSearch, fetchDetails, EXPERIENCE_LEVELS } from '@/lib/scraper';
+import { scoreTitle, isRelevant, TIERS, DEFAULT_THRESHOLD } from '@/lib/relevance';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,6 +49,7 @@ export async function GET(request) {
   const remote = searchParams.get('remote') || '';
   const datePosted = searchParams.get('datePosted') || '';
   const pace = int(searchParams.get('pace'), 1400, 700, 6000);
+  const relevance = searchParams.get('relevance') || 'strict';
   const experience = (searchParams.get('experience') || '')
     .split(',')
     .map((x) => Number.parseInt(x, 10))
@@ -112,6 +114,7 @@ export async function GET(request) {
       }, 12000);
 
       const collected = [];
+      let rejected = 0;
 
       try {
         send({
@@ -130,11 +133,28 @@ export async function GET(request) {
           signal: ac.signal,
           onEvent: (e) => send(e),
           onBatch: async (cards, meta) => {
-            // When we asked LinkedIn for f_WT=2 every card is remote by definition; carry that
-            // signal so the client filter does not throw away cards whose text lacks the word.
-            const tagged = remote === 'remote' ? cards.map((c) => ({ ...c, matchedRemoteFilter: true })) : cards;
-            collected.push(...tagged);
-            send({ type: 'jobs', jobs: tagged, meta });
+            // LinkedIn's keyword search returns anything containing the words anywhere in the
+            // posting, so a "Data Scraper" query comes back with "Virtual Assistant" and
+            // "Google Ads Executive". Every card is scored against the query and only titles that
+            // actually match the requested role survive.
+            const scored = cards.map((c) => {
+              const s = scoreTitle(c.title, keywords);
+              // When we asked LinkedIn for f_WT=2 every card is remote by definition; carry that
+              // signal so the client filter does not throw away cards whose text lacks the word.
+              return {
+                ...c,
+                matchScore: Number(s.score.toFixed(2)),
+                matchTier: s.tier,
+                ...(remote === 'remote' ? { matchedRemoteFilter: true } : {}),
+              };
+            });
+            const tier = TIERS.find((t) => t.id === relevance) || TIERS[0];
+            const kept = scored.filter((c) => c.matchScore >= tier.threshold);
+
+            rejected += scored.length - kept.length;
+            collected.push(...kept);
+            if (rejected) send({ type: 'filtered', rejected, kept: kept.length, total: scored.length, tier: tier.id });
+            if (kept.length) send({ type: 'jobs', jobs: kept, meta: { ...meta, rejected } });
           },
         });
 
@@ -172,7 +192,9 @@ export async function GET(request) {
 
         send({
           type: 'done',
-          delivered: searchRes.delivered,
+          delivered: collected.length,
+          rejected,
+          relevance,
           stopReason: searchRes.stopReason,
           stats: { ...searchRes.stats, elapsedMs: Date.now() - startedAt },
           cursor: cursorOut,

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 
-export function Toolbar({ jobs, total, keyword, onExport }) {
+export function Toolbar({ jobs, total, keyword, onExport, rejected }) {
   return (
     <div className="card flex flex-wrap items-center gap-2 px-4 py-3">
       <div className="mr-auto flex min-w-0 items-baseline gap-2">
@@ -15,6 +15,14 @@ export function Toolbar({ jobs, total, keyword, onExport }) {
         {keyword ? (
           <span className="hidden max-w-[220px] truncate rounded-full bg-surface-100 px-2 py-0.5 text-2xs text-ink-500 sm:inline">
             {keyword}
+          </span>
+        ) : null}
+        {rejected ? (
+          <span
+            className="rounded-full bg-amber-50 px-2 py-0.5 text-2xs text-amber-700"
+            title="LinkedIn returned these for the keyword, but their titles do not match the role"
+          >
+            {rejected} off-topic hidden
           </span>
         ) : null}
       </div>

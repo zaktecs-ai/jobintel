@@ -204,6 +204,33 @@ export default function SearchPanel({ form, setForm, onRun, onStop, status, runn
               />
             </div>
 
+            <div className="rounded-lg border border-surface-200 bg-surface-50/60 p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="block text-sm font-medium text-ink-900">Title match</span>
+                  <span className="block text-xs text-ink-400">
+                    {form.loose
+                      ? 'Related titles too (Web Scraper for Data Scraper)'
+                      : 'Only titles that match your keywords closely'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, loose: !f.loose }))}
+                  aria-pressed={Boolean(form.loose)}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                    form.loose ? 'bg-ink-900' : 'bg-surface-300'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+                      form.loose ? 'left-[1.375rem]' : 'left-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
             <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-surface-200 bg-surface-50/60 p-3 transition hover:border-ink-300">
               <input
                 type="checkbox"

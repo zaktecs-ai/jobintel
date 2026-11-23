@@ -10,6 +10,7 @@ import { useJobStream } from '@/lib/useJobStream';
 import { downloadCSV, downloadJSON } from '@/lib/export';
 import { freshnessMs, isFreshWithin } from '@/lib/freshness';
 import { matchesWorkplace } from '@/lib/workplace';
+import { matchesSeniority, describeLevels } from '@/lib/seniority';
 
 const DEFAULT_FORM = {
   keywords: '',
@@ -20,6 +21,7 @@ const DEFAULT_FORM = {
   maxResults: 50,
   details: true,
   pace: 1400,
+  relevance: 'strict',
 };
 
 const SORTS = [
@@ -35,6 +37,7 @@ export default function Page() {
   const [onlyFresh, setOnlyFresh] = useState(false);
   const [onlyRemote, setOnlyRemote] = useState(false);
   const [sort, setSort] = useState('relevance');
+  const [showRelated, setShowRelated] = useState(false);
 
   const { status, jobs, stats, error, log, progress, start, stop } = useJobStream();
   const listRef = useRef(null);
@@ -42,6 +45,9 @@ export default function Page() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let out = jobs.filter((j) => {
+      // LinkedIn's own f_E filter over-returns (an Entry request came back 40% Mid-Senior), so
+      // the requested tiers are enforced here against each posting's real seniority.
+      if (!matchesSeniority(j.seniority, form.experience)) return false;
       if (q && !`${j.title} ${j.company}`.toLowerCase().includes(q)) return false;
       if (seniority && j.seniority !== seniority) return false;
       if (onlyFresh && !isFreshWithin(j, 3)) return false;
@@ -57,7 +63,7 @@ export default function Page() {
       out = out.slice().sort((a, b) => String(a.company || '').localeCompare(String(b.company || ''), 'en', { sensitivity: 'base' }));
     }
     return out;
-  }, [jobs, query, seniority, onlyFresh, onlyRemote, sort]);
+  }, [jobs, query, seniority, onlyFresh, onlyRemote, sort, form.experience]);
 
   const busy = status === 'running' || status === 'paused';
   const showSkeleton = busy && jobs.length < Math.min(form.maxResults, 10);
@@ -68,6 +74,14 @@ export default function Page() {
     if (kind === 'csv') downloadCSV(filtered, `jobintel-${safe}-${stamp}.csv`);
     else downloadJSON(filtered, `jobintel-${safe}-${stamp}.json`);
   };
+
+  // "Show related titles" re-runs the same query with the relaxed threshold.
+  useEffect(() => {
+    if (!showRelated) return;
+    setShowRelated(false);
+    start({ ...form, relevance: 'broad' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showRelated]);
 
   // keyboard: "/" focuses filter, Esc stops a run
   useEffect(() => {
@@ -123,7 +137,7 @@ export default function Page() {
             onRun={(q) => {
               setQuery('');
               setSeniority('');
-              start(q);
+              start({ ...q, relevance: q.loose ? 'broad' : 'strict' });
               setTimeout(() => listRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 120);
             }}
             onStop={stop}
@@ -147,7 +161,7 @@ export default function Page() {
 
           {jobs.length ? (
             <>
-              <Toolbar jobs={filtered} total={form.maxResults} keyword={form.keywords} onExport={onExport} />
+              <Toolbar jobs={filtered} total={form.maxResults} keyword={form.keywords} onExport={onExport} rejected={stats?.rejected || 0} />
               <FilterBar
                 jobs={jobs}
                 filtered={filtered.length}
@@ -185,8 +199,25 @@ export default function Page() {
               </div>
               {!filtered.length ? (
                 <div className="card px-4 py-10 text-center">
-                  <p className="text-sm font-medium text-ink-900">No jobs match those filters</p>
-                  <p className="mt-1 text-xs text-ink-400">Clear the filter chips to see all {jobs.length} results.</p>
+                  {jobs.length === 1 && stats?.rejected > 0 ? (
+                    <>
+                      <p className="text-sm font-medium text-ink-900">
+                        No posting matched “{form.keywords}” closely
+                      </p>
+                      <p className="mx-auto mt-1 max-w-[46ch] text-xs leading-relaxed text-ink-400">
+                        LinkedIn returned {stats.rejected} postings for that keyword, but none of their
+                        titles actually describe the role. Try related titles instead.
+                      </p>
+                      <button type="button" onClick={() => setShowRelated(true)} className="btn-ghost mx-auto mt-4 text-xs">
+                        Show related titles
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-ink-900">No jobs match those filters</p>
+                      <p className="mt-1 text-xs text-ink-400">Clear the filter chips to see all {jobs.length} results.</p>
+                    </>
+                  )}
                 </div>
               ) : null}
             </>
