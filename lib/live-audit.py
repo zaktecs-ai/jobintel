@@ -14,8 +14,12 @@ def check(name, ok, detail=""):
 
 
 def jsj(expr):
+    # js() already deserialises JSON objects into dicts; only strings need json.loads.
+    val = js(expr)
+    if isinstance(val, (dict, list)):
+        return val
     try:
-        return json.loads(js(expr))
+        return json.loads(val)
     except Exception as exc:
         return {"_error": str(exc)}
 

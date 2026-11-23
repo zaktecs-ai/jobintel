@@ -28,9 +28,18 @@ export default function StatusBar({ status, progress, stats, jobs, onStop }) {
 
         <div className="flex items-center gap-3 font-mono text-2xs text-ink-400">
           {progress.phase === 'detail' ? (
-            <span className="text-accent-700">
-              enriching <span className="text-ink-900">{progress.enriched || 0}</span>
-              <span className="text-ink-300"> / {progress.enrichTotal}</span>
+            <span className={progress.waitMs ? 'text-amber-600' : 'text-accent-700'}>
+              {progress.waitMs ? (
+                <>
+                  cooling down <span className="text-ink-900">{Math.ceil(progress.waitMs / 1000)}s</span>
+                  <span className="text-ink-300"> · {progress.enriched || 0}/{progress.enrichTotal}</span>
+                </>
+              ) : (
+                <>
+                  enriching <span className="text-ink-900">{progress.enriched || 0}</span>
+                  <span className="text-ink-300"> / {progress.enrichTotal}</span>
+                </>
+              )}
             </span>
           ) : (
             <span>

@@ -155,6 +155,7 @@ export async function GET(request) {
               onJob: async (job, meta) => {
                 send({ type: 'detail', job, meta });
               },
+              onWait: (info) => send({ type: 'detail_wait', ...info }),
             });
             send({ type: 'enrich_done', done: enriched.jobs.length, total: collected.length, stats: enriched.stats });
           } else {
